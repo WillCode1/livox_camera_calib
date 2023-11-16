@@ -1,8 +1,8 @@
 %YAML:1.0
 
 # Topic name in rosbag
-PointCloudTopic: "/livox/lidar"
-ImageTopic: "/camera/color/image_raw"
+# PointCloudTopic: "/livox/lidar"
+# ImageTopic: "/camera/color/image_raw"
 
 ExtrinsicMat: !!opencv-matrix
   rows: 4
