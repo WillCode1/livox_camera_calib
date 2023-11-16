@@ -1,8 +1,8 @@
 # Data path. adjust them!
 common:
-    image_file: "/home/ycj/data/calib/image/0.png"
-    pcd_file: "/home/ycj/data/calib/pcd/0.pcd"
-    result_file: "/home/ycj/data/calib/extrinsic.txt"
+    image_file: "/home/will/data/lidar_carmera_calib/test1/image.png"
+    pcd_file: "/home/will/data/lidar_carmera_calib/test1/00.pcd"
+    result_file: "/home/will/code/slam/driver_ws/src/livox_camera_calib/result/extrinsic.txt"
 
 # Camera Parameters. Adjust them!
 camera:
@@ -13,5 +13,5 @@ camera:
 
 # Calibration Parameters.!
 calib:
-    calib_config_file: "/home/ycj/catkin_ws/src/livox_camera_calib/config/config_outdoor.yaml"
+    calib_config_file: "/home/will/code/slam/driver_ws/src/livox_camera_calib/config/config_outdoor.yaml"
     use_rough_calib: true # set true if your initial_extrinsic is bad
