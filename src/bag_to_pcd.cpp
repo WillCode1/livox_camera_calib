@@ -4,6 +4,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <opencv2/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
@@ -12,17 +14,23 @@ using namespace std;
 
 string bag_file;
 string lidar_topic;
-string pcd_file;
+string image_topic;
+string result_path;
 bool is_custom_msg;
+int lidar_frame_cnt;
+int image_frame_cnt;
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "lidarCamCalib");
   ros::NodeHandle nh;
   nh.param<string>("bag_file", bag_file, "");
-  nh.param<string>("pcd_file", pcd_file, "");
+  nh.param<string>("result_path", result_path, "");
   nh.param<string>("lidar_topic", lidar_topic, "/livox/lidar");
+  nh.param<string>("image_topic", image_topic, "/image_raw");
   nh.param<bool>("is_custom_msg", is_custom_msg, false);
+  nh.param<int>("lidar_frame_cnt", lidar_frame_cnt, 20);
+  nh.param<int>("image_frame_cnt", image_frame_cnt, 10);
   pcl::PointCloud<pcl::PointXYZI> output_cloud;
   std::fstream file_;
   file_.open(bag_file, ios::in);
@@ -43,11 +51,14 @@ int main(int argc, char **argv)
     ROS_ERROR_STREAM("LOADING BAG FAILED: " << e.what());
     return -1;
   }
-  std::vector<string> lidar_topic_vec;
-  lidar_topic_vec.push_back(lidar_topic);
-  rosbag::View view(bag, rosbag::TopicQuery(lidar_topic_vec));
+  std::vector<string> topic_vec;
+  topic_vec.push_back(lidar_topic);
+  rosbag::View view(bag, rosbag::TopicQuery(topic_vec));
   for (const rosbag::MessageInstance &m : view)
   {
+    if (--lidar_frame_cnt == 0)
+      break;
+
     if (is_custom_msg)
     {
       livox_ros_driver::CustomMsg livox_cloud_msg =
@@ -79,8 +90,20 @@ int main(int argc, char **argv)
   output_cloud.is_dense = false;
   output_cloud.width = output_cloud.points.size();
   output_cloud.height = 1;
-  pcl::io::savePCDFileASCII(pcd_file, output_cloud);
-  string msg = "Sucessfully save point cloud to pcd file: " + pcd_file;
-  ROS_INFO_STREAM(msg.c_str());
+  pcl::io::savePCDFileASCII(result_path + "/0.pcd", output_cloud);
+  string msg = "Sucessfully save point cloud to pcd file: " + result_path + "/0.pcd";
+  ROS_WARN_STREAM(msg.c_str());
+
+  topic_vec[0] = image_topic;
+  rosbag::View view2(bag, rosbag::TopicQuery(topic_vec));
+  for (const rosbag::MessageInstance &m : view2)
+  {
+    if (--image_frame_cnt == 0)
+      break;
+
+    sensor_msgs::Image image = *(m.instantiate<sensor_msgs::Image>());
+    cv_bridge::CvImageConstPtr ptr = cv_bridge::toCvCopy(image, "bgr8");
+    cv::imwrite(result_path + "/" + std::to_string(image_frame_cnt) + ".png", ptr->image);
+  }
   return 0;
 }

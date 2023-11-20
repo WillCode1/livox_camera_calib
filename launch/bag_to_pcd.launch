@@ -1,12 +1,10 @@
 <launch>
-  <node 
-    pkg="livox_camera_calib"
-    type="bag_to_pcd"
-    name="bag_to_pcd"
-    output="screen"
-  />
-   <param name="bag_file" type="string" value="/home/ycj/data/calib/outdoor1.bag"/>
-   <param name="lidar_topic" type="string" value="/livox/lidar"/>
-   <param name="pcd_file" type="string" value="$(find livox_camera_calib)/result/0.pcd"/>
+  <node pkg="livox_camera_calib" type="bag_to_pcd" name="bag_to_pcd" output="screen"/>
+   <param name="bag_file" type="string" value="/home/will/data/work_data/calib/calibration1.bag"/>
+   <param name="lidar_topic" type="string" value="/rslidar_points"/>
+   <param name="image_topic" type="string" value="/image_view/output"/>
+   <param name="lidar_frame_cnt" type="int" value="20"/>
+   <param name="image_frame_cnt" type="int" value="10"/>
+   <param name="result_path" type="string" value="$(find livox_camera_calib)/result"/>
    <param name="is_custom_msg" type="bool" value="false"/>
 </launch>
